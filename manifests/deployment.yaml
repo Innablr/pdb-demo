@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdb-demo
+  labels:
+    app: pdb-demo
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: pdb-demo
+      labels:
+        app: pdb-demo
+    spec:
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                topologyKey: "kubernetes.io/hostname"
+                labelSelector:
+                  matchLabels:
+                    app: pdb-demo
+              weight: 100
+      containers:
+        - name: pdb-demo
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              port: 80
+              path: "/"
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: pdb-demo
